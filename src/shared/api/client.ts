@@ -1,3 +1,5 @@
+import process from 'dotenv';
+
 interface RequestOptions extends RequestInit {
   bodyData?: Record<string, any> | unknown;
 }
@@ -81,4 +83,4 @@ class ApiClient {
 }
 
 // base url env
-// export const api = new ApiClient(process.env.PUBLIC_API_URL || "")
+export const api = new ApiClient(process.env.PUBLIC_API_URL || "")
