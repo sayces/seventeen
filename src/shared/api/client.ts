@@ -1,4 +1,4 @@
-import process from 'dotenv';
+import 'dotenv';
 
 interface RequestOptions extends RequestInit {
   bodyData?: Record<string, any> | unknown;

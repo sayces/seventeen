@@ -1,4 +1,4 @@
-import { registrationData } from "../model/registration-schema";
+import { registrationData } from "../model/validate-registration-schema";
 
 const validate = (formData: FormData) => {
   const data = Object.fromEntries(formData.entries());
