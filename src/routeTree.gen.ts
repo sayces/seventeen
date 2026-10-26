@@ -10,8 +10,8 @@
 
 import { Route as rootRouteImport } from './pages/__root'
 import { Route as IndexRouteImport } from './pages/index'
-import { Route as LoginRouteImport } from './pages/login'
-import { Route as RegisterRouteImport } from './pages/register'
+import { Route as LoginRouteImport } from './pages/login/ui/index'
+import { Route as RegisterRouteImport } from './pages/login/ui/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
