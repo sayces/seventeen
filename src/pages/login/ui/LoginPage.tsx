@@ -13,10 +13,10 @@ export const LoginPage = () => {
   return (
     <form onSubmit={(e) => validate(new FormData(e.target))}>
       <label htmlFor="email">Электронная почта</label>
-      <input id="email" name="email" required/>
+      <input id="email" name="email" required />
 
       <label htmlFor="password">Пароль</label>
-      <input id="password" name="password" type="password" required/>
+      <input id="password" name="password" type="password" required />
     </form>
   );
 };
