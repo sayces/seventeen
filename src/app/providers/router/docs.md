@@ -1,46 +1,58 @@
-# File-based маршрутизация
+# Code-based маршрутизация (TanStack Router)
 
-TanStack Router сканирует `src/pages` и автоматически создаёт
-`src/app/providers/router/routeTree.gen.ts` при запуске Vite (`npm run dev`
-или `npx vite build`). Сгенерированный файл хранится в Git: он нужен TypeScript
-до запуска Vite в команде `npm run build`. Вручную его не редактируют.
+Маршруты задаются явно в коде. Генератор и Vite-плагин маршрутизации не нужны;
+имена файлов в `src/pages` не определяют URL.
 
 ## Структура
 
-- `src/pages/__root.tsx` — корневой layout с `Outlet`.
-- `src/pages/index.tsx` — `/`.
-- `src/pages/login.tsx` — `/login`.
-- `src/pages/register.tsx` — `/register`.
-- `src/app/providers/router/router.ts` — экземпляр роутера и регистрация типов.
-- `src/app/providers/router/index.tsx` — React-провайдер.
+- `rootRoute.ts` — `createRootRoute` с `Outlet` для дочерних страниц.
+- `routeTree.ts` — `createRoute`, связи родителей через `getParentRoute`
+  и сборка дерева через `rootRoute.addChildren`.
+- `router.ts` — единственный экземпляр `createRouter` и расширение интерфейса
+  `Register` для типизации `Link`, `useNavigate` и других API TanStack Router.
+- `index.tsx` — `RouterProvider`, подключённый в `App`.
+- `src/pages` — компоненты страниц, не файлы конфигурации маршрутов.
 
-Компоненты страниц остаются в существующих папках `ui`. Файлы маршрутов
-импортируют их и экспортируют `Route`, созданный через `createFileRoute`.
+## Текущие маршруты
 
-## Добавление страницы
+| URL | Компонент |
+| --- | --- |
+| `/` | `HomePage` |
+| `/login` | `LoginPage` |
+| `/register` | `RegisterPage` |
 
-Создай `src/pages/about.tsx`:
+Главная страница импортируется напрямую. Формы загружаются по необходимости
+через `lazyRouteComponent` с указанием именованного экспорта. Route-конфигурация
+при этом остаётся доступна синхронно для сопоставления URL.
+
+## Добавление маршрута
+
+В `routeTree.ts` создай маршрут и включи его в `addChildren`:
 
 ```tsx
-import { createFileRoute } from '@tanstack/react-router';
-
-export const Route = createFileRoute('/about')({
-  component: () => <h1>О проекте</h1>,
+const aboutRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: 'about',
+  component: lazyRouteComponent(
+    () => import('@/pages/about/ui/AboutPage'),
+    'AboutPage',
+  ),
 });
+
+export const routeTree = rootRoute.addChildren([
+  indexRoute,
+  loginRoute,
+  registerRoute,
+  aboutRoute,
+]);
 ```
 
-При работающем dev-сервере дерево обновится автоматически. Регистрировать
-страницу в `router.ts` или вызывать `addChildren` вручную не нужно.
+Для вложенности передавай непосредственного родителя в `getParentRoute`,
+собирай его детей через `addChildren` и оставляй `Outlet` в компоненте родителя.
+Для динамических сегментов используй `path: '$userId'`.
 
-## Исключения
+Для клиентской навигации используй `Link` из `@tanstack/react-router`,
+например `<Link to="/login">Войти</Link>`.
 
-В `vite.config.ts` настроен `routeFileIgnorePattern`:
-
-- папки `ui` и `model` не являются маршрутами;
-- все файлы `.ts` (включая существующий `login/index.ts`) игнорируются;
-- файлы маршрутов должны иметь расширение `.tsx`;
-- дополнительные служебные файлы/папки можно исключать префиксом `-`
-  (стандартное поведение TanStack Router).
-
-Обычный компонент `.tsx` вне исключённых папок будет рассматриваться как
-маршрут, поэтому размещай UI в `ui`, а не рядом с route-файлами.
+Сгенерированного дерева больше нет: изменения маршрутов нужно регистрировать
+вручную. Команда `npm run build` по-прежнему проверяет TypeScript до сборки Vite.
