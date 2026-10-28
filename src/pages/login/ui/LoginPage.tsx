@@ -17,6 +17,7 @@ export const LoginPage = () => {
 
       <label htmlFor="password">Пароль</label>
       <input id="password" name="password" type="password" required />
+      <button type="submit">Войти</button>
     </form>
   );
 };
